@@ -128,7 +128,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Ticker Voice`,
+      copyright: `Copyright © ${new Date().getFullYear()} Ticker Voice Project. All Copyrights Reserved`,
     },
     prism: {
       theme: prismThemes.github,
