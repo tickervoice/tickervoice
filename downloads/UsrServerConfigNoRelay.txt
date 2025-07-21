@@ -1,0 +1,7 @@
+VoiceVolume=0.1
+VoiceType=1
+VoiceOn=True
+API_ID=
+API_HASH=
+CHAT_ID =
+

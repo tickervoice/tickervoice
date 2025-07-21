@@ -1,0 +1,21 @@
+<svg width="400" height="120" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <style>
+    .title { font: bold 36px sans-serif; fill: #2b2b2b; }
+    .highlight { fill: #3a86ff; }
+    .candlestick { fill: #06d6a0; }
+    .wave { fill: none; stroke: #ff006e; stroke-width: 2; }
+  </style>
+
+  <!-- Candlestick bars (symbolizing stock) -->
+  <rect class="candlestick" x="20" y="40" width="6" height="40"></rect>
+  <rect class="candlestick" x="32" y="30" width="6" height="60"></rect>
+  <rect class="candlestick" x="44" y="45" width="6" height="35"></rect>
+
+  <!-- Voice wave (symbolizing sound/alert) -->
+  <path class="wave" d="M80 60 q10 -20 20 0 t20 0 t20 0 t20 0"></path>
+
+  <!-- Text: Ticker Voice -->
+  <text class="title" x="160" y="70">
+    <tspan class="highlight">Ticker</tspan> Voice
+  </text>
+</svg>
