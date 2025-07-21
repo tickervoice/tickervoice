@@ -62,7 +62,7 @@
    * insert your telegram api id and hash into config text : API_ID=YourID , API_HASH=YourHash
    * launch voice terminal, upon receiving messages, check print messages in terminal window, pick the target actual chatid from your chat box with ticker voice bot (likely different from the one shown from chatbox with command chatid), insert into CHAT_ID=targetid
    * in config text setup specific nickname: DelegatedClientX=nickname,fakemacid,clientip,clientvoiceport,clienttxtport , X can be any single number, make sure it is the number to be put into DelegatedClientIndex=X,Y  (one or multiple client target)
-   * [Click here to download the Android Media Relay App](#) *(Replace with actual download link or Google Play URL)*
+   * [Click here to download the Android Media Relay App](#) *(To be uploaded)*
    * in app settings page , make sure nickname is initially set to be same as in text config , can be changed from app after first time sync with voice terminal program
    * in app settings page , whenver port or nickname manually changed and unfocused, it will automatically sync with voice terminal
    * in app settings page , whenver device ip dynamically changed by router dhcp , it will automatically sync with voice terminal
