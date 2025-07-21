@@ -11,12 +11,12 @@ const config: Config = {
     v4: true,
   },
 
-  // ✅ Set your GitHub Pages URL and base path
+  
   url: 'https://tickervoice.github.io',
   baseUrl: '/tickervoice/',
 
-  organizationName: 'tickervoice', // ✅ your GitHub username
-  projectName: 'tickervoice',      // ✅ your GitHub repo name
+  organizationName: 'tickervoice', 
+  projectName: 'tickervoice',    
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -123,7 +123,7 @@ const config: Config = {
             },
             {
               label: 'Donation & Payment',
-              href: 'https://www.paypal.com/donate', // ✅ placeholder corrected
+              href: 'https://www.paypal.com/donate', 
             },
           ],
         },
