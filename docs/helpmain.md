@@ -18,6 +18,6 @@
    * [/help_MockTrading](/docs/help/MockTrading.md)   [/help_AutoMockTrading](/docs/help/MockTrading.md#automocktrading) - to do mock trading
    * [/help_BatchCmd](/docs/help/BatchCmd.md) - to form a batch command set
    * [/help_Calc](/docs/help/calc.md) - to calculate expression
-   * [/help_VoiceTerminal](/docs/download#d-download-the-voice-terminal-python-source-code-and-config-no-relaybased-on-c) - to setup voice terminal to read msg
+   * [/help_VoiceTerminal](/docs/install#d-download-the-voice-terminal-python-source-code-and-config-no-relaybased-on-c) - to setup voice terminal to read msg
    * [/help_Disclaimer](/docs/disclaimer.md) - to show Disclaimer
    
