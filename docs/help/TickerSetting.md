@@ -14,7 +14,8 @@
    * [/help_TickerTrailingStop](/docs/help/TickerSetting#tickertrailingstop)
    * [/help_TickerDayPercentageStop](/docs/help/TickerSetting#tickerdaypercentagestop)
    * [/help_ChangeRawTickerSetting](/docs/help/ChangeCommand#changerawtickersetting)
-   
+   * [/help_AutoTrade](/docs/help/MockTrading#automocktrading)
+   * [/help_TickerSilent](/docs/help/TickerSetting#tickersilent)
 ## TickerMarketFormat
    * live Support US, Canada,Taiwan
    * yahoo US :  AAPL (live data)
@@ -223,6 +224,28 @@
      aapl moving average 60,-30
      aapl remove moving average
      ~~~
+   [TickerSettingMenu](/docs/help/TickerSetting#tickersettingmenu)
+## TickerSilent
+   
+   - to set ticker to silent, either way, single or multiple
+    ~~~bash
+    change silent = AAPL,AMD
+    AAPL silent
+    AAPL enable silent
+    TSLA,AMD silent
+    ~~~
+    
+   - apply silent with needed one or multiple interval 
+    ~~~bash
+    change silent = AAPL:5m,AMD:1h  
+    TSLA:5m,AMD:1h,MU:5m:1h silent
+    ~~~
+   
+   - to remove silent for ticker, single or multiple
+    ~~~bash
+    AAPL remove silent      - to remove silent for ticker
+    AAPL,AMD disable silent - to disable silent/make it unsilent for ticker
+    ~~~
      
    [TickerSettingMenu](/docs/help/TickerSetting#tickersettingmenu) 
 
