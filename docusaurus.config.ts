@@ -154,7 +154,7 @@ const config: Config = {
             },
             {
               label: 'Donation & Payment',
-              to: 'paypal',
+              href: '/docs/payment',
             },
           ],
         },
