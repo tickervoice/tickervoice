@@ -20,6 +20,7 @@
      - to create batch 1 commands either content= or cmds= or commands=
        ~~~bash
        batch 1 content=insert [tickers] :: [tickers] regular price    
+       batch 1 tickers=aapl,amd
        ~~~
 
      - to remove batch 1, either one of two
