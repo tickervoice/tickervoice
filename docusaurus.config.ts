@@ -2,25 +2,37 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
+// This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
+
 const config: Config = {
   title: 'Ticker Voice',
-  tagline: 'A Telegram-based real-time stock price, indicator, candle formation voice alert and mock trading platform',
+  tagline: 'A telegram based real-time stock price, indicator, candle formation voice alert and mock trading platform',
   favicon: 'img/logo.ico',
 
+  // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
-    v4: true,
+    v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
 
-  
+  // Set the production url of your site here
   url: 'https://tickervoice.github.io',
-  baseUrl: '/tickervoice/',
+  // Set the /<baseUrl>/ pathname under which your site is served
+  // For GitHub pages deployment, it is often '/<projectName>/'
+  //baseUrl: '/',
+  baseUrl: '/',
 
-  organizationName: 'tickervoice', 
-  projectName: 'tickervoice',    
-
+  // GitHub pages deployment config.
+  // If you aren't using GitHub pages, you don't need these.
+  //organizationName: 'facebook', // Usually your GitHub org/user name.
+  //projectName: 'docusaurus', // Usually your repo name.
+  organizationName: 'tickervoice',
+  projectName: 'tickervoice', 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
 
+  // Even if you don't use internationalization, you can use this field to set
+  // useful metadata like html lang. For example, if your site is Chinese, you
+  // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
@@ -32,8 +44,12 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+          // Please change this to your repo.
+          // Remove this to remove the "edit this page" links.
+          //editUrl:
+            //'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
           editUrl:
-            'https://github.com/tickervoice/tickervoice/tree/main/',
+            'https://github.com/tickervoice/tickervoice/tree/main/',  
         },
         blog: {
           showReadingTime: true,
@@ -41,8 +57,13 @@ const config: Config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
+          // Please change this to your repo.
+          // Remove this to remove the "edit this page" links.
+          //editUrl:
+            //'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
           editUrl:
-            'https://github.com/tickervoice/tickervoice/tree/main/',
+            'https://github.com/tickervoice/tickervoice/tree/main/',  
+          // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
@@ -55,7 +76,8 @@ const config: Config = {
   ],
 
   themeConfig: {
-
+    // Replace with your project's social card
+    //image: 'img/docusaurus-social-card.jpg',
     navbar: {
       title: 'Ticker Voice',
       logo: {
@@ -84,12 +106,20 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Help',
-              to: '/tickervoice/docs/helpmain',
+              label: 'Readme', 
+              to: '/docs/readmes',
             },
             {
-              label: 'Installation',
-              to: '/tickervoice/docs/install',
+              label: 'Help',
+              to: '/docs/helpmain',
+            },
+            {
+              label: 'Installation', 
+              to: '/docs/install',
+            },
+            {
+              label: 'Usecase', 
+              to: '/docs/usecase',
             },
           ],
         },
@@ -97,7 +127,7 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'YouTube',
+              label: 'Youtube',
               href: 'https://www.youtube.com/@TickerVoice',
             },
             {
@@ -113,17 +143,18 @@ const config: Config = {
         {
           title: 'More',
           items: [
+            
             {
               label: 'Support & Sales',
               href: 'https://t.me/tickervoice',
             },
             {
               label: 'Disclaimer',
-              to: '/tickervoice/docs/disclaimer',
+              href: '/docs/disclaimer',
             },
             {
               label: 'Donation & Payment',
-              href: 'https://www.paypal.com/donate', 
+              to: 'paypal',
             },
           ],
         },
