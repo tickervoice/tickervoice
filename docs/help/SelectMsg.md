@@ -22,4 +22,5 @@
      selectmsg 7 sub bullish list
      ~~~
      - config sample: AllowedMsgID7(sub bullish list)=CC4,6,8CD7EM3,13ER8,10KD3,9-10RC1
-   [Back to MainMenu](/docs/helpmain.md)
+   
+[Back to MainMenu](/docs/helpmain.md)
