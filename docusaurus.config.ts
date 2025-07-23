@@ -92,6 +92,7 @@ const config: Config = {
           label: 'Help',
         },
         {to: '/docs/install', label: 'Installation', position: 'left'},
+        {to: '/docs/readmes', label: 'Readme', position: 'left'},
         {
           href: 'https://t.me/tickervoicegroup',
           label: 'Telegram demo group',
