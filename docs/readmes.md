@@ -7,7 +7,7 @@
 ## Support Market
    * Support Martket  :   US,Canada(live data)  other market upon request
    * Support Interval  :  5m,1h  # other interval upon request 1m,15m ,30m flexible
-   * Support Telegram chat type:  Private , channel, group   (channel, group with no free service)
+   * Support Telegram chat type:  Private , channel, group   (channel, group with no free service except demo group by admin)
 
 ## Service Time Window
    * live data processed on Trading days 7am to 17pm, other time can do any offline setting via botservice
