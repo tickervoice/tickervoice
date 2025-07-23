@@ -16,7 +16,12 @@ function HomepageHeader() {
         <Heading as="h1" className="hero__title">
           {siteConfig.title}
         </Heading>
-        <a href="/docs/readmes"><p className="hero__subtitle">{siteConfig.tagline}</p></a>
+        <div style={{ marginBottom: '1rem' }}>
+				  <Link className={styles.linkText} to="/docs/readmes">
+				    {siteConfig.tagline}
+				  </Link>
+				</div>
+        
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"

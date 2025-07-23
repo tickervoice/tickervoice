@@ -22,9 +22,12 @@
   justify-content: center;
 }
 
-a {
-  color: inherit;
-  opacity: 1;
-  visibility: visible;
-  text-decoration: underline; /* optional */
+.linkText {
+  font-size: 1.2rem;
+  text-decoration: underline;
+  color: white; /* default: light mode */
+}
+
+html[data-theme='dark'] .linkText {
+  color: black;  /* soft purple in dark mode */
 }
