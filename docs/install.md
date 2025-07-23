@@ -29,7 +29,7 @@
      pip install pyaudio,pyttsx3,watchdog,telethon
      ```
    
-## D. Download the Voice Terminal Python Source code and config (no Relay)(based on C):
+## D. Download the Voice Terminal Python Source code and config (no Relay)(based on section C):
    
    * download following two files and place in same folder , and launch voice reader in command window
      ```bash
@@ -48,21 +48,21 @@
        * API_HASH - Yout telegram api hash code
        * CHAT_ID - Initially blank, run first to detect chat id then manually update with target id , could be multiple if you also use channel of group 
        
-## E. Paid user download voice terminal relay version source code (based on C) and Android Media Relay App and optional screen msg relay
+## E. Paid user download voice terminal relay version source code (based on section C) and Android Media Relay App and optional screen msg relay
 
    * download following four files and place in same folder , and launch in command window
      ```bash
      py UsrTeleSyncedVoiceMultiRelay.py
      py UdpScrMsgServer.py  (optional for screen msg overlay display)
      ```   
-   * [PC voice terminal python source code relay version](/downloads/UsrTeleSyncedVoiceMultiRelay.py)
-   * [PC voice terminal config text relay version](/downloads/UsrServerConfigMultiReplay.txt)
-   * [Screen overlay msg display python source code client](/downloads/UdpMsgClient.py)
-   * [Screen overlay msg display python source code server](/downloads/UdpScrMsgServer.py)
+   * [PC voice terminal python source code relay version]*(contact admin)*
+   * [PC voice terminal config text relay version]*(contact admin)*
+   * [Screen overlay msg display python source code client]*(contact admin)*
+   * [Screen overlay msg display python source code server]*(contact admin)*
    * insert your telegram api id and hash into config text : API_ID=YourID , API_HASH=YourHash
    * launch voice terminal, upon receiving messages, check print messages in terminal window, pick the target actual chatid from your chat box with ticker voice bot (likely different from the one shown from chatbox with command chatid), insert into CHAT_ID=targetid
    * in config text setup specific nickname: DelegatedClientX=nickname,fakemacid,clientip,clientvoiceport,clienttxtport , X can be any single number, make sure it is the number to be put into DelegatedClientIndex=X,Y  (one or multiple client target)
-   * [Click here to download the Android Media Relay App](#) *(To be uploaded)*
+   * [Click here to download the Android Media Relay App]*(contact admin)*
    * in app settings page , make sure nickname is initially set to be same as in text config , can be changed from app after first time sync with voice terminal program
    * in app settings page , whenver port or nickname manually changed and unfocused, it will automatically sync with voice terminal
    * in app settings page , whenver device ip dynamically changed by router dhcp , it will automatically sync with voice terminal
