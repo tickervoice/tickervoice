@@ -28,10 +28,11 @@
      ```bash
      pip install pyaudio,pyttsx3,watchdog,telethon
      ```
-   
+   * optionally download [ffmpeg](https://ffmpeg.org/download.html) if need to play customized sound file for event alert use , set a base user folder, put sound file under sub folder UserMedia, after ffmpeg installed, include ffmpeg/bin into system path
+    
 ## D. Download the Voice Terminal Python Source code and config (no Relay)(based on section C):
    
-   * download following two files and place in same folder , and launch voice reader in command window
+   * download following two files and place in same user base folder , and launch voice reader in command window
      ```bash
      py UsrTeleVoiceNoRelay.py
      ```   
