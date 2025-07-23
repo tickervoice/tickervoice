@@ -159,7 +159,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Ticker Voice Project. All Copyrights Reserved`,
+      copyright: `Copyright © ${new Date().getFullYear()} Ticker Voice Project in Ontario Canada. All Copyrights Reserved `,
     },
     prism: {
       theme: prismThemes.github,
