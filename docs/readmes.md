@@ -5,7 +5,7 @@
    * Telegram bot name:  MPTMsgBot , free service register code :   tickervoice
 
 ## Support Market
-   * Support Martket  :   [US](/docs/help/USTickers),Canada,[fx](/docs/help/NonStockTickers#currency),[Commodity](/docs/help/NonStockTickers#commodity),[crypto](/docs/help/NonStockTickers#crypto) (live data)  other market upon request
+   * Support Martket  :   [US](/docs/help/USTickers.md),Canada,[fx](/docs/help/NonStockTickers#currency),[Commodity](/docs/help/NonStockTickers#commodity),[crypto](/docs/help/NonStockTickers#crypto) (live data)  other market upon request
    * Support Interval  :  5m,1h  # other interval upon request 1m,15m ,30m flexible
    * Support Telegram chat type:  Private , channel, group   (channel, group with no free service except demo group by admin)
 
