@@ -6,7 +6,7 @@
    * /book authcode - to book service, /renew authcode - to renew service
    * /stop -to stop service, delete all config
    * /selectmsg to select interested message types-high level must do before doing any other filtering or setting [/help_SelectMsg](/docs/help/SelectMsg.md)
-   * /listmsg  - to view all message types    [/help_SubAllowedMsgForTicker](/docs/help/SubAllowedMsgForTicker.md)
+   * /listmsg  - to view [all message types](/docs/help/MsgList)  ,  [/help_SubAllowedMsgForTicker](/docs/help/SubAllowedMsgForTicker.md)
    * [/help_TickerSettingMenu](/docs/help/TickerSetting.md)  commands for ticker setting changes
    * /change -to make low level changes  [/help_ChangeCommands](/docs/help/ChangeCommand.md)
    * /show -to view raw config setting
