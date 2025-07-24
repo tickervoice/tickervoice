@@ -19,7 +19,7 @@ const config: Config = {
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   //baseUrl: '/',
-  baseUrl: '/tickervoice/',
+  baseUrl: '/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -93,6 +93,7 @@ const config: Config = {
         },
         {to: '/docs/install', label: 'Installation', position: 'left'},
         {to: '/docs/readmes', label: 'Readme', position: 'left'},
+        {to: '/docs/qanda', label: 'Q & A', position: 'left'},
         {
           href: 'https://t.me/tickervoicegroup',
           label: 'Telegram demo group',
@@ -121,6 +122,10 @@ const config: Config = {
             {
               label: 'Usecase', 
               to: '/docs/usecase',
+            },
+            {
+              label: 'Q & A', 
+              to: '/docs/qanda',
             },
           ],
         },
