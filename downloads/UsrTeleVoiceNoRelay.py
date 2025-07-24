@@ -2,14 +2,77 @@ import threading,re,sys,time,os,pyaudio,asyncio,subprocess,pyttsx3
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from telethon import TelegramClient, events
-sys.path.append("D:/cjm/py/common")
-from ConfigReader import read_config,get_str_from_config,get_str_list_from_config
-from ConfigUpdater import modify_config_lines,modify_config_line
-from AudioFunctions import get_audio_device_index
 p = pyaudio.PyAudio()
-SERVER_CONFIG = "UsrServerConfigNoRelay.txt"
-config_values = read_config(SERVER_CONFIG)
-VOICE_ON = config_values.get("VoiceOn", "True").lower() in ("true","yes","on","1")
+
+def get_audio_device_index():
+		internal_device_index = None
+		mic_device_index = None
+		# List all available input devices
+		for i in range(p.get_device_count()):
+		    info = p.get_device_info_by_index(i)
+		    print(f"channel id = {i} name= {info['name']}  ")
+		    if internal_device_index is None and "Stereo Mix" in info['name']:
+		    	  internal_device_index = i
+		    	  print(f"internal audio input channel id = {internal_device_index}   ")
+		    	  print(f"{info['name']}")
+		    elif mic_device_index is None and "Microphone Array" in info['name']:
+		        mic_device_index = i
+		        print(f"Mic audio input channel id = {mic_device_index}")
+		return internal_device_index,mic_device_index
+def read_config(file_path): ## without multiline pick up
+    config = {}
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            for line in file:
+                line = line.strip()
+                # Skip empty lines and lines starting with a comment
+                if line and not line.startswith("#"):
+                    # Remove comments starting with #
+                    line = re.split(r"#", line, 1)[0].strip()
+                    # Split the line into key and value
+                    if "=" in line:
+                        key, value = line.split("=", 1)
+                        config[key.strip()] = value.strip()
+    except FileNotFoundError:
+        print(f"Error: Configuration file '{file_path}' not found.")
+    except ValueError:
+        print("Error: Invalid line format in configuration file.")
+    return config	  
+def replace_commas_in_brackets(key_value_list):
+    updated_list = []
+    for item in key_value_list:
+        modified = []
+        inside_brackets = False
+        for char in item:
+            if char == "[":
+                inside_brackets = True
+            elif char == "]":
+                inside_brackets = False
+            if inside_brackets and char == ",":
+                modified.append(":")
+            else:
+                modified.append(char)
+        updated_list.append("".join(modified))
+    return updated_list          
+def parse_keys(key_value):
+    def clean_entry(s):
+        # Remove trailing '|[]' or '|[  ]' (with optional spaces inside)
+        return re.sub(r'\|\[\s*\]$', '', s.strip(" '\""))
+    if isinstance(key_value, list):
+        # Replace commas in brackets in all items
+        key_value = replace_commas_in_brackets(key_value)
+        keys = [clean_entry(item) for item in key_value]
+    elif isinstance(key_value, str):
+        # Replace commas inside brackets with colons
+        key_value = re.sub(r'\[(.*?)\]', lambda m: f'[{m.group(1).replace(",", ":")}]', key_value)
+        # Then split by comma
+        keys = [clean_entry(item) for item in key_value.split(",")]
+    else:
+        raise ValueError(f"Unexpected value type: {type(key_value)}")
+    return keys
+def get_str_list_from_config(config_values,config_list_name):
+    fstr_list=config_values.get(config_list_name, "")
+    return parse_keys(fstr_list)
 class ConfigChangeHandler(FileSystemEventHandler):
     def on_modified(self, event):
         try:
@@ -28,15 +91,6 @@ def start_watching():
     observer = Observer()
     observer.schedule(event_handler, ".", recursive=False)  # Watches current directory
     observer.start()
-watch_thread = threading.Thread(target=start_watching, daemon=True)
-watch_thread.start()
-FORMAT = pyaudio.paInt16
-CHANNELS = 2  
-RATE = 44100 
-CHUNK = 1024  
-internal_device_index = None
-mic_device_index = None
-internal_device_index,mic_device_index = get_audio_device_index()
 def parse_message(message_content):
     pattern = r':play\((.*?)\)'
     match = re.search(pattern, message_content)
@@ -60,6 +114,20 @@ def transform_message(message_content):
         spaced = ' '.join(match.group(1))
         return f"{spaced} {match.group(2)}"
     return message_content      
+    
+
+SERVER_CONFIG = "UsrServerConfigNoRelay.txt"
+config_values = read_config(SERVER_CONFIG)
+VOICE_ON = config_values.get("VoiceOn", "True").lower() in ("true","yes","on","1")
+watch_thread = threading.Thread(target=start_watching, daemon=True)
+watch_thread.start()
+FORMAT = pyaudio.paInt16
+CHANNELS = 2  
+RATE = 44100 
+CHUNK = 1024  
+internal_device_index = None
+mic_device_index = None
+internal_device_index,mic_device_index = get_audio_device_index()
 engine = pyttsx3.init()
 voices = engine.getProperty('voices')
 volume = float(config_values.get("VoiceVolume","1"))
