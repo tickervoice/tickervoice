@@ -80,3 +80,5 @@
 * KR03=KDJ & RSI, ERSI all  bottom
 * KR04=KDJ & ERSI both  bottom
 * RC01= ticker $price
+
+[Back to MainMenu](/docs/helpmain.md)
