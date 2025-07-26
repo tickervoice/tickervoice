@@ -1,6 +1,36 @@
 
 # iBorrow short data
   * To fetch short data from https://www.iborrowdesk.com/report/Ticker , eliminate duplicated available number, only keep the first one
+
+## Sample fetch steps to show condensed result
+  * make sure target ticker inserted first, remove it later if not in need of other monitor job
+    ~~~bash
+    insert rily
+    ~~~
+  * run iborrow command 
+    ~~~bash
+    iborrow rily
+    ~~~
+    - condensed result from old to new
+    ~~~bash
+    📊 RILY Borrow Data (Real-Time):
+    0721 08:47:34   200000
+    0721 11:53:42   250000
+    0721 12:09:13   300000
+    0722 08:47:59   100000
+    0722 09:50:01   250000
+    0722 11:53:59   400000
+    0722 14:13:29   350000
+    0722 16:17:32   250000
+    0723 08:48:19    30000
+    0723 09:34:54    45000
+    0723 12:25:28   550000
+    0724 08:48:11   150000
+    0724 11:07:50   250000
+    0725 08:47:52   100000
+    0725 09:18:53   200000
+    0725 11:23:01   100000
+    ~~~
   
 ## Original Sample visit from web
   * open browser visit https://www.iborrowdesk.com/report/RILY
@@ -78,35 +108,5 @@ Fee	Available	Updated   (from new to old , pick oldest as tartet staring record)
 .......... duplicates in number
 13.0 %	200,000	2025-07-21 08:47:34   -- target record
 ~~~
-
-## Sample fetch steps to show condensed result
-  * make sure target ticker inserted first, remove it later if not in need of other monitor job
-    ~~~bash
-    insert rily
-    ~~~
-  * run iborrow command 
-    ~~~bash
-    iborrow rily
-    ~~~
-    - condensed result from old to new
-    ~~~bash
-    📊 RILY Borrow Data (Real-Time):
-    0721 08:47:34   200000
-    0721 11:53:42   250000
-    0721 12:09:13   300000
-    0722 08:47:59   100000
-    0722 09:50:01   250000
-    0722 11:53:59   400000
-    0722 14:13:29   350000
-    0722 16:17:32   250000
-    0723 08:48:19    30000
-    0723 09:34:54    45000
-    0723 12:25:28   550000
-    0724 08:48:11   150000
-    0724 11:07:50   250000
-    0725 08:47:52   100000
-    0725 09:18:53   200000
-    0725 11:23:01   100000
-    ~~~
 
 [Back to MainMenu](/docs/helpmain.md)
