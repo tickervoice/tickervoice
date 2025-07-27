@@ -3,10 +3,6 @@
   * To fetch short data from https://www.iborrowdesk.com/report/Ticker , eliminate duplicated available number, only keep the first one
 
 ## Sample fetch steps to show condensed result
-  * make sure target ticker inserted first, remove it later if not in need of other monitor job
-    ~~~bash
-    insert rily
-    ~~~
   * run iborrow command 
     ~~~bash
     iborrow rily
@@ -108,5 +104,7 @@ Fee	Available	Updated   (from new to old , pick oldest as tartet staring record)
 .......... duplicates in number
 13.0 %	200,000	2025-07-21 08:47:34   -- target record
 ~~~
+
+
 
 [Back to MainMenu](/docs/helpmain.md)
