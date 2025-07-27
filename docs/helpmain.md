@@ -14,6 +14,7 @@
    * /chatid  or /alias - to get chatid or alias, user voice terminal need to use chatid (only for channel and group, for private need to detect new teminal chatid) to filter msg and users can communicate via chatid or alias  [/help_ChangeAlias](/docs/help/ChangeAlias.md)
    * /event  - to show or set up notice event  [/help_NoticeEventSetup](/docs/help/NoticeEventSetup.md)
    * [/iborrow ticker](/docs/help/iborrow.md) - to fetch intraday short data
+   * [/fintel ticker](/docs/help/fintel.md) - to fetch fintel tutes transaction detail
    * /msg  /message - to message other members or get support [/help_Message](/docs/help/Message.md)
    * / - followed with other ticker setting command contexts, such prefix only needed in group chat
    * [/help_MockTrading](/docs/help/MockTrading.md)   [/help_AutoMockTrading](/docs/help/MockTrading.md#automocktrading) - to do mock trading

@@ -47,7 +47,7 @@
        * VoiceOn - True for On , False for Off
        * API_ID - Your telegram api id  
        * API_HASH - Yout telegram api hash code
-       * CHAT_ID - Initially blank, run first to detect chat id then manually update with target id , could be multiple if you also use channel of group 
+       * CHAT_ID - Initially blank, run first to detect chat id then manually update with target id , could be multiple if you also use channel or group 
        
 ## E. Paid user download voice terminal relay version source code (based on section C) and Android Media Relay App and optional screen msg relay
 
