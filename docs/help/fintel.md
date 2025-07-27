@@ -7,7 +7,7 @@
     ~~~bash
     fintel rily
     ~~~
-    - condensed result from new to old, only display top 50 lines , Type S=share, P=put, C=call
+    - condensed result from new to old, only display top 30 lines , Type S=share, P=put, C=call
     ~~~bash
     FintelTutesTrans >1ksTop50L
     date,type,shares,investor
