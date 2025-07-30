@@ -26,6 +26,13 @@
     ~~~bash 
     intc apply msglist 1 
     ~~~
+    - to apply one stock with certain interval only to allowed msg type list 1
+    ~~~bash 
+    intc:5m apply msglist 1 
+    ~~~
+    ~~~bash 
+    intc:5m:1h apply msglist 1 
+    ~~~
     - to apply multiple stock to allowed msg type list 2
     ~~~bash 
     amd,nvda apply msglist 2 
@@ -33,5 +40,9 @@
     - to unapply ticker from sub allowed msg list
     ~~~bash 
     intc,amd unapply msglist 
+    ~~~
+    - to unapply ticker from sub allowed msg list, here will ignore interval, just apply all about this ticker
+    ~~~bash 
+    intc:5m,amd:1h unapply msglist   - equal to intc,amd unapply msglist 
     ~~~
 [Back to MainMenu](/docs/helpmain.md)

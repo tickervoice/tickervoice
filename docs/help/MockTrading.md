@@ -120,7 +120,7 @@
     trading summary
     ~~~
     
-## Margine rate and funds locked
+## Margin rate and funds locked
   * there is 50% margin , 50% deposit locked
   * mixed account of long and short, double funds locked for cover
 
