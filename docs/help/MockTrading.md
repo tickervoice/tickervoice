@@ -105,20 +105,58 @@
     ~~~
     
 ## View holding
+
     ~~~bash  
     holding
+    ~~~
+
+    - holding summary with long position     
+    ~~~bash  
+ 💰 Cash Balance(short inc): $-479,018.00
+ 🟢 Buying Power: $305,379.50
+
+🗃 Holdings: (market value vs cost base) 
+💸 APLD 119300s M$13.15 = $1,568,795.00 C$12.795, +2.77%
+
+📦 Long Holding Value: $1,568,795.00
+💼 Total Net Value:      $1,089,777.00         +8.98%
+    ~~~
+    
+    - holding summary with short position         
+    ~~~bash  
+💰 Cash Balance(short inc): $1,452,424.50
+🔒 Short Pos locked: $700,341.00
+ 🟢 Buying Power: $752,083.50
+
+🗃 Holdings: (market value vs cost base) 
+💸 CRDF -191350s M$2.44 = $-466,894.00 C$2.359, -3.43%
+
+📦 Short Holding Value: $-466,894.00
+💼 Total Net Value:      $985,530.50         -1.45%    
     ~~~
 
 ## View trades done
   * to view trading history record, either one,Trades history record keep 50 at most
     ~~~bash
     trades done
-    trade done
     trading history
     trading record/rec
     trading rec
     trading summary
     ~~~
+  - sample trading summary
+~~~bash
+📊 Trade History:
+1,F) buy TSLA 200@$319.68 on 2025-07-29 10:26:42
+2,F) sell TSLA 200@$322.39 on 2025-07-29 11:01:08
+3,F) short TSLA -600@$321.55 on 2025-07-29 11:05:19
+4,F) short TSLA -100@$321.21 on 2025-07-29 11:05:43
+5,F) short TSLA -600@$321.17 on 2025-07-29 11:10:09
+6,F) short TSLA -100@$321.65 on 2025-07-29 11:10:33
+7,F) short TSLA -800@$321.68 on 2025-07-29 11:11:21
+9,F) cover TSLA -200@$319.80 on 2025-07-29 11:35:25
+10,F) cover TSLA -50@$319.90 on 2025-07-29 11:35:47
+~~~
     
 ## Margin rate and funds locked
   * there is 50% margin , 50% deposit locked

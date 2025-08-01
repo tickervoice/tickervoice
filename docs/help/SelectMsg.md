@@ -1,7 +1,7 @@
 
 # selectmsg
 [Back to MainMenu](/docs/helpmain.md)
-   * to select from main message list, display at most 79 lines of menus,select anyone needed and save, optional memo content can be applied , this is a must step for global message type filter
+   * to select from main [message list](/docs/help/MsgList.md), display at most 79 lines of menus,select anyone needed and save, optional memo content can be applied , this is a must step for global message type filter
      ~~~bash
      selectmsg 
      ~~~

@@ -1,6 +1,6 @@
 
 # All Message Types
-
+[Back to MainMenu](/docs/helpmain.md)
 * CC01=last PM hour new low vs prior hrs
 * CC02=last PM hour new high vs prior hrs
 * CC03=last PM hour confirmed closed new low vs prior hrs
