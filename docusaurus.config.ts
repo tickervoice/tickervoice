@@ -93,6 +93,7 @@ const config: Config = {
         },
         {to: '/docs/install', label: 'Installation', position: 'left'},
         {to: '/docs/readmes', label: 'Readme', position: 'left'},
+        {to: '/docs/usecase', label: 'Usecase', position: 'left'},
         {to: '/docs/qanda', label: 'Q & A', position: 'left'},
         {
           href: 'https://t.me/tickervoicegroup',
