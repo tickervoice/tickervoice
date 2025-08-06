@@ -20,7 +20,7 @@
 
 ## Message Types
    * all alert based on a set of accepted message types
-   * each user maintains a global message types list, as well as other 9 sub message types list be used to do auto trading or alert filter for tickers
+   * each user maintains a series of global message types list, as well as other 9 sub message types list for each series be used to do auto trading or alert filter for tickers
 
 ## stock price alert
    * multiple warning price met

@@ -6,7 +6,9 @@
    * /book authcode - to book service, /renew authcode - to renew service
    * /stop -to stop service, delete all config
    * [/selectmsg](/docs/help/SelectMsg.md) to select interested message types-high level must do before doing any other filtering or setting [/help_SelectMsg](/docs/help/SelectMsg.md)
+   * [/selectmsgb](/docs/help/SelectMsgB.md) to select interested message types-high level must do before doing any other filtering or setting [/help_SelectMsg](/docs/help/SelectMsgB.md)   
    * [/listmsg](/docs/help/MsgList.md)  - to view [all message types](/docs/help/MsgList.md)  ,  [/help_SubAllowedMsgForTicker](/docs/help/SubAllowedMsgForTicker.md)
+   * [/listmsgb](/docs/help/MsgListB.md)  - to view [all message types series b](/docs/help/MsgListB.md)  ,  [/help_SubAllowedMsgForTicker](/docs/help/SubAllowedMsgForTickerB.md)
    * [/help_TickerSettingMenu](/docs/help/TickerSetting.md)  commands for ticker setting changes
    * [/change](/docs/help/ChangeCommand.md) -to make low level changes  [/help_ChangeCommands](/docs/help/ChangeCommand.md)
    * /show -to view raw config setting
@@ -21,4 +23,7 @@
    * [/calc](/docs/help/calc.md) - to calculate expression including formatted [/help_Calc](/docs/help/calc.md) if no /calc , only support basic expression calculation
    * [/help_VoiceTerminal](/docs/install#d-download-the-voice-terminal-python-source-code-and-config-no-relaybased-on-c) - to setup voice terminal to read msg
    * [/help_Disclaimer](/docs/disclaimer.md) - to show Disclaimer
+   
    * Note: All commands can be no / , it is only a must use in group chat when bot is privacy on , otherwise not needed as a must no matter in private or channel or group 
+   * menu interface in progress, current menu support input ticker to select action from menu items for several setting actions. message type list selection menu, moving average selection menu
+   
