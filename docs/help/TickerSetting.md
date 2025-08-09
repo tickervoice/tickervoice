@@ -219,11 +219,13 @@
 ## TickerMovingAverage
    * To set interested moving average and get price warning or MA cross up or down info, or confirmed up above MA or below,if no MA number set, will show selection menu, negative to remove , positive to add
      ~~~bash
-     aapl moving average
+     aapl moving average   -  this triggers ma selection menu
      aapl moving average 5,20,30
      aapl moving average 60,-30
      aapl remove moving average
      ~~~
+     -![ma selection menu](/img/docs/mamenu.png)
+     
    [TickerSettingMenu](/docs/help/TickerSetting#tickersettingmenu)
 ## TickerSilent
    

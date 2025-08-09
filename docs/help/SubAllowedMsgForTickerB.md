@@ -20,6 +20,13 @@
     ~~~bash 
     selectmsgb  1  bullish msg
     ~~~    
+    - to delete memo
+    ~~~bash
+    selectmsgb 7 *
+    selectmsgb 7 delete memo
+    selectmsgb 7 remove memo
+    ~~~    
+    
 * /listmsgb          - to view all message types 
 * apply and unapply ticker to allowed msg type list
     - to apply one stock to allowed msg type list 1
@@ -45,4 +52,8 @@
     ~~~bash 
     intc:5m,amd:1h unapply msglistb   - equal to intc,amd unapply msglist 
     ~~~
+    
+    - from menu , type ticker symbol to launch ticker menu, [uncheck button](/img/docs/unapplymsglistmenu.png) and confirm to unapply  
+     
+    
 [Back to MainMenu](/docs/helpmain.md)

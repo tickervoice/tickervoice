@@ -20,11 +20,22 @@
     ~~~bash 
     selectmsg  1  bullish msg
     ~~~    
+    - to delete memo
+    ~~~bash
+    selectmsg 1 *
+    selectmsg 1 delete memo
+    selectmsg 1 remove memo
+    ~~~    
 * /listmsg          - to view all message types 
 * apply and unapply ticker to allowed msg type list
+    - to launch menu to apply one stock to allowed msg type list 
+    ~~~bash 
+    intc apply msglist  - this will trigger menu select one and it will apply, can also check toApplyMsgList launch from ticker menu
+    ~~~
+    ![menu](/img/docs/applymsglistmenu.png)
     - to apply one stock to allowed msg type list 1
     ~~~bash 
-    intc apply msglist 1 
+    intc apply msglist 1  --  no menu if specific index applied in command
     ~~~
     - to apply one stock with certain interval only to allowed msg type list 1
     ~~~bash 
@@ -45,4 +56,8 @@
     ~~~bash 
     intc:5m,amd:1h unapply msglist   - equal to intc,amd unapply msglist 
     ~~~
+    
+    - from ticker menu to unapply ticker from sub allowed msg list, here will ignore interval, just apply all about this ticker
+    
+    
 [Back to MainMenu](/docs/helpmain.md)
