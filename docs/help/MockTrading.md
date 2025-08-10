@@ -110,31 +110,6 @@
     holding
     ~~~
 
-    - holding summary with long position     
-    ~~~bash  
- 💰 Cash Balance(short inc): $-479,018.00
- 🟢 Buying Power: $305,379.50
-
-🗃 Holdings: (market value vs cost base) 
-💸 APLD 119300s M$13.15 = $1,568,795.00 C$12.795, +2.77%
-
-📦 Long Holding Value: $1,568,795.00
-💼 Total Net Value:      $1,089,777.00         +8.98%
-    ~~~
-    
-    - holding summary with short position         
-    ~~~bash  
-💰 Cash Balance(short inc): $1,452,424.50
-🔒 Short Pos locked: $700,341.00
- 🟢 Buying Power: $752,083.50
-
-🗃 Holdings: (market value vs cost base) 
-💸 CRDF -191350s M$2.44 = $-466,894.00 C$2.359, -3.43%
-
-📦 Short Holding Value: $-466,894.00
-💼 Total Net Value:      $985,530.50         -1.45%    
-    ~~~
-
 ## View trades done
   * to view trading history record, either one,Trades history record keep 50 at most
     ~~~bash
@@ -162,6 +137,11 @@
   * there is 50% margin , 50% deposit locked
   * mixed account of long and short, double funds locked for cover
 
+## Test cases
+  * [Long Test](/docs/help/MockTestCaseLong.md) 
+  * [Short Test](/docs/help/MockTestCaseShort.md) 
+  * [Mix Test](/docs/help/MockTestCaseMix.md) 
+  
 ## AutoMockTrading
 
    - to set autotrade tickers, either way, single or multiple
