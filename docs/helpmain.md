@@ -25,5 +25,5 @@
    * [/help_VoiceTerminal](/docs/install#d-download-the-voice-terminal-python-source-code-and-config-no-relaybased-on-c) - to setup voice terminal to read msg
    * [/help_Disclaimer](/docs/disclaimer.md) - to show Disclaimer
    * Note: All commands can be no / , it is only a must use in group chat when bot is privacy on , otherwise not needed as a must no matter in private or channel or group 
-   * menu interface in progress, current menu support input ticker to select action from menu items for several setting actions. message type list selection menu, moving average selection menu
+   * [menu interface](/docs/help/menu.md) in progress, current menu support input TICKER to select action from menu items for several setting actions. message type list selection menu, moving average selection menu
    
