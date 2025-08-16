@@ -34,8 +34,8 @@ const FeatureList: FeatureItem[] = [
     description: (
       <>
         Current free tele private chat plan offer 30 days in a row with full feature. No payment method required.
-        Free plan can be extended upon request after evaluation of first month use bothway, then pay as you wish like donation.
-        Paid plan : Channel $19.99, Group $29.99 per month
+        Free plan can be extended upon request after evaluation of first month use , donation accepted.
+        Paid plan : Channel , Group 
         All type of accounts with reasonable limited ticker settings.
         Valid free trial authcode :        tickervoice      
         For paid authcode : contact <a href='https://t.me/tickervoice'>Sales</a>
