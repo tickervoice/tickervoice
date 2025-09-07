@@ -49,5 +49,22 @@
       event remove 1,2
       remove event 1,2
       ~~~
-     
+     - message body can include  [cmd:command1::command2]  to run commands 1 and 2 , :: to separate multiple commands
+      ~~~bash
+      event 1 15:40 [cmd:insert xauusd::xauusd regular price]
+      ~~~  
+      ~~~bash
+      Your remaining event as follows:
+      Your event 1: at 15:40 one time notice
+          [cmd:insert xauusd::xauusd regular price]
+
+      (command 'insert xauusd::xauusd regular price' triggered)  0907154002-0436b2
+
+      ['XAUUSD'] added
+
+      XAUUSD setting changed to be :
+      Symbol|Company: XAUUSD
+      Regular price notification active.
+      Set for both indicator/candle monitor and price warning.
+      ~~~
    [Back to MainMenu](/docs/helpmain.md)
