@@ -89,7 +89,8 @@ function speak(text){
   if(!window.speechSynthesis) return;
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang='en-US';
-  utter.rate=1.8;
+  const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+  utter.rate = isMobile ? 1.2 : 2; // slower on mobile
   window.speechSynthesis.speak(utter);
 }
 
@@ -281,4 +282,5 @@ window.addEventListener('DOMContentLoaded', ()=>{
 </script>
 </body>
 </html>
+
 
