@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Yahoo/YFinance demo — dynamic tickers + TTS + cookies</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:24px;background:#f7fafc;color:#0f172a}
+.card{background:white;padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(15,23,42,0.08);max-width:950px}
+input, button, select {padding:8px 10px;font-size:15px;border-radius:8px;border:1px solid #e6eef6;color:#000;}
+button{background:#2563eb;color:white;border:0;font-weight:600;cursor:pointer;}
+.row{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.grid{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+.kv{background:#f1f5f9;padding:12px;border-radius:8px;min-width:120px;text-align:center}
+.muted{color:#64748b;font-size:14px}
+.ticker-row input{width:100px;}
+.ticker-row button{width:30px;}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>Yahoo/YFinance — TTS demo</h2>
+
+<div class="row">
+  <select id="interval">
+    <option value="1m">1m</option>
+    <option value="5m" selected>5m</option>
+    <option value="1h">1h</option>
+    <option value="1d">1d</option>
+  </select>
+  <select id="range">
+    <option value="1d" selected>1d</option>
+    <option value="1mo">1mo</option>
+  </select>
+  <button id="go">Get</button>
+  <select id="refresh">
+    <option value="0">Auto-refresh: Off</option>
+    <option value="15000" selected>Every 15s</option>
+    <option value="30000">Every 30s</option>
+    <option value="60000">Every 1m</option>
+  </select>
+  <button id="addTicker">+ Add Ticker</button>
+  <button id="clearAll">Clear All</button>
+</div>
+
+<div id="status" class="muted">Ready.</div>
+<div id="tickerContainer"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let refreshTimer = null;
+let lastClose = {};
+let triggerCount = {};
+
+// --- Cookie helpers ---
+function setCookie(name,value,days=365){
+  const d=new Date(); d.setTime(d.getTime()+days*24*60*60*1000);
+  document.cookie=`${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/`;
+}
+function deleteCookie(name){
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+}
+function clearAllCookies(){
+  document.cookie.split(';').forEach(c=>{
+    const name = c.split('=')[0].trim();
+    if(name.startsWith('row-')) deleteCookie(name);
+  });
+  triggerCount = {};
+  lastClose = {};
+  $('tickerContainer').innerHTML='';
+}
+
+// --- Generate unique key for rows ---
+function genKey(){ return 'row-' + Math.random().toString(36).substr(2,9); }
+
+// --- Map interval to range ---
+function mapRange(interval){
+  switch(interval){
+    case '5m': return '1d';
+    case '1h': return '1mo';
+    case '1d': return '1mo';
+    case '1m': return '1d';
+    default: return '1d';
+  }
+}
+
+// --- Fetch with proxy ---
+async function fetchWithProxy(url){
+  try{
+    const r = await fetch(url,{cache:"no-store"});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return await r.json();
+  }catch(e){
+    const proxy='https://corsproxy.io/?'+encodeURIComponent(url);
+    const r2=await fetch(proxy,{cache:"no-store"});
+    if(!r2.ok) throw new Error('Proxy HTTP '+r2.status);
+    return await r2.json();
+  }
+}
+
+// --- Helpers ---
+function safeNumber(x){return (x==null||Number.isNaN(x))?'—':Number(x).toLocaleString(undefined,{maximumFractionDigits:2});}
+function speak(text){
+  if(!window.speechSynthesis) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang='en-US';
+  const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+  utter.rate = isMobile ? 1.2 : 1.6;
+  window.speechSynthesis.speak(utter);
+}
+
+// --- Add ticker row ---
+function addTickerRow(ticker='', stoploss='', stopbuy='', key=null){
+  const rowKey = key || genKey();
+  const row=document.createElement('div');
+  row.className='row ticker-row';
+  row.dataset.key=rowKey;
+  row.innerHTML=`
+    <input class="ticker-input" placeholder="Ticker" value="${ticker}">
+    <input class="stoploss-input" placeholder="StopLoss" value="${stoploss}" ${stoploss?'':'disabled'}>
+    <input class="stopbuy-input" placeholder="StopBuy" value="${stopbuy}" ${stopbuy?'':'disabled'}>
+    <button class="remove-btn">-</button>
+    <div class="grid card-${rowKey}"></div>
+  `;
+  $('tickerContainer').appendChild(row);
+
+  const tickerInput=row.querySelector('.ticker-input');
+  const stoplossInput=row.querySelector('.stoploss-input');
+  const stopbuyInput=row.querySelector('.stopbuy-input');
+
+  // Input validation (numbers only, allow decimal)
+  [stoplossInput, stopbuyInput].forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      let val = inp.value.replace(/[^\d.]/g,'');
+      const parts = val.split('.');
+      if(parts.length>2) val = parts[0]+'.'+parts.slice(1).join('');
+      inp.value = val;
+      saveRowCookie(row);
+    });
+  });
+
+  // Save cookie when ticker changes
+  tickerInput.addEventListener('input', ()=>saveRowCookie(row));
+  tickerInput.addEventListener('focusout', ()=>saveRowCookie(row));
+
+  // Remove row + cookie
+  row.querySelector('.remove-btn').addEventListener('click', ()=>{
+    deleteRowCookie(row.dataset.key);
+    row.remove();
+    if(document.querySelectorAll('.ticker-row').length===0){
+      lastClose={}; triggerCount={};
+    }
+  });
+}
+
+// --- Save / Delete cookie ---
+function saveRowCookie(row){
+  const ticker=row.querySelector('.ticker-input').value.trim();
+  const stoploss=row.querySelector('.stoploss-input').value.trim();
+  const stopbuy=row.querySelector('.stopbuy-input').value.trim();
+  if(ticker){
+    setCookie(row.dataset.key, JSON.stringify({ticker, stoploss, stopbuy}));
+  }
+}
+function deleteRowCookie(key){
+  if(key) deleteCookie(key);
+  delete lastClose[key];
+  delete triggerCount[key];
+}
+
+// --- Fetch ticker data ---
+async function fetchTicker(row){
+  const tickerInput=row.querySelector('.ticker-input');
+  const stoplossInput=row.querySelector('.stoploss-input');
+  const stopbuyInput=row.querySelector('.stopbuy-input');
+  const sym=tickerInput.value.trim();
+  if(!sym) return;
+
+  const range=mapRange($('interval').value);
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=${range}&interval=${$('interval').value}`;
+
+  try{
+    const json=await fetchWithProxy(url);
+    const res=json.chart.result[0];
+    const q=res.indicators.quote[0];
+    const ts=res.timestamp;
+    let idx=ts.length-1; while(idx>=0 && q.close[idx]==null) idx--;
+    if(idx<0) return;
+
+    const o=q.open[idx], h=q.high[idx], l=q.low[idx], c=q.close[idx], v=q.volume[idx];
+    const cardDiv=row.querySelector(`.card-${row.dataset.key}`);
+    cardDiv.innerHTML=`
+      <div class="kv"><strong>${sym} Open</strong><div>${safeNumber(o)}</div></div>
+      <div class="kv"><strong>${sym} High</strong><div>${safeNumber(h)}</div></div>
+      <div class="kv"><strong>${sym} Low</strong><div>${safeNumber(l)}</div></div>
+      <div class="kv"><strong>${sym} Close</strong><div>${safeNumber(c)}</div></div>
+      <div class="kv"><strong>${sym} Volume</strong><div>${v?.toLocaleString()||'—'}</div></div>
+    `;
+
+    if(c!=null){
+      stoplossInput.disabled=false;
+      stopbuyInput.disabled=false;
+
+      if(lastClose[row.dataset.key]!==c){
+        speak(`${sym.toUpperCase()} $${c.toFixed(2)}`);
+        lastClose[row.dataset.key]=c;
+      }
+      if(!triggerCount[row.dataset.key]) triggerCount[row.dataset.key]={stoploss:0, stopbuy:0};
+
+      const sl=parseFloat(stoplossInput.value);
+      const sb=parseFloat(stopbuyInput.value);
+
+      if(!isNaN(sl) && c<=sl){
+        triggerCount[row.dataset.key].stoploss++;
+        speak(`${sym.toUpperCase()} stopped out at $${c.toFixed(2)}`);
+        if(triggerCount[row.dataset.key].stoploss>=3){
+          stoplossInput.value=''; triggerCount[row.dataset.key].stoploss=0; saveRowCookie(row);
+        }
+      } else if(!isNaN(sl)) triggerCount[row.dataset.key].stoploss=0;
+
+      if(!isNaN(sb) && c>=sb){
+        triggerCount[row.dataset.key].stopbuy++;
+        speak(`${sym.toUpperCase()} triggered buy at $${c.toFixed(2)}`);
+        if(triggerCount[row.dataset.key].stopbuy>=3){
+          stopbuyInput.value=''; triggerCount[row.dataset.key].stopbuy=0; saveRowCookie(row);
+        }
+      } else if(!isNaN(sb)) triggerCount[row.dataset.key].stopbuy=0;
+
+    } else {
+      stoplossInput.disabled=true;
+      stopbuyInput.disabled=true;
+    }
+
+  }catch(err){ console.error('Error fetching '+sym,err); }
+}
+
+// --- Fetch all ---
+function fetchAllTickers(){
+  document.querySelectorAll('.ticker-row').forEach(row=>fetchTicker(row));
+  $('status').textContent='Updated • '+(new Date()).toLocaleTimeString();
+}
+
+// --- Auto-refresh ---
+function startRefresh(){
+  if(refreshTimer) clearInterval(refreshTimer);
+  const ms=parseInt($('refresh').value);
+  if(ms>0) refreshTimer=setInterval(fetchAllTickers, ms);
+}
+
+// --- Events ---
+$('go').addEventListener('click', fetchAllTickers);
+$('interval').addEventListener('change', fetchAllTickers);
+$('refresh').addEventListener('change', startRefresh);
+$('addTicker').addEventListener('click', ()=>addTickerRow());
+$('clearAll').addEventListener('click', ()=>clearAllCookies());
+
+// --- Load cookies ---
+window.addEventListener('DOMContentLoaded', ()=>{
+  const cookies=document.cookie.split(';').map(c=>c.trim());
+  let restored=0;
+  cookies.forEach(c=>{
+    const eq=c.indexOf('='); if(eq<0) return;
+    const name=c.substring(0,eq).trim();
+    const value=c.substring(eq+1).trim();
+    if(name.startsWith('row-') && value){
+      try{
+        const data=JSON.parse(decodeURIComponent(value));
+        addTickerRow(data.ticker,data.stoploss,data.stopbuy,name);
+        restored++;
+      }catch(e){}
+    }
+  });
+  if(restored===0) addTickerRow();   // only add default row if no cookies exist
+  fetchAllTickers();
+  startRefresh();
+});
+</script>
+</body>
+</html>
