@@ -26,10 +26,10 @@ function HomepageHeader(): JSX.Element {
 
         {/* New static links */}
         <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap',justifyContent: 'center' }}>
-          <a className={styles.linkText} href="/y.html" target="_blank" rel="noreferrer">
+          <a className={styles.linkText} href="/tickervoice/y.html" target="_blank" rel="noreferrer">
             yfinance
           </a>
-          <a className={styles.linkText} href="/i.html" target="_blank" rel="noreferrer">
+          <a className={styles.linkText} href="/tickervoice/i.html" target="_blank" rel="noreferrer">
             investing
           </a>
         </div>
