@@ -90,7 +90,7 @@ function speak(text){
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang='en-US';
   const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-  utter.rate = isMobile ? 1.0 : 1.6; // slower on mobile
+  utter.rate = isMobile ? 1.2 : 1.6; // slower on mobile
   window.speechSynthesis.speak(utter);
 }
 
@@ -282,6 +282,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
 </script>
 </body>
 </html>
+
 
 
 
