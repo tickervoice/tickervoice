@@ -29,8 +29,11 @@ button{background:#2563eb;color:white;border:0;font-weight:600;cursor:pointer;}
   <select id="interval">
     <option value="1m">1m</option>
     <option value="5m" selected>5m</option>
+    <option value="10m">10m</option>
+    <option value="15m">15m</option>
+    <option value="20m">20m</option>
+    <option value="30m">30m</option>
     <option value="1h">1h</option>
-    <option value="1d">1d</option>
   </select>
   <button id="go">Get</button>
   <select id="refresh">
@@ -121,10 +124,8 @@ function addTickerRow(ticker='',stoploss='',stopbuy='',warning='',daypct='',ttsA
   const pctSpan=row.querySelector('.pct');
   const prevSpan=row.querySelector('.prev-close');
 
-  // Remove row
   row.querySelector('.remove-btn').addEventListener('click',()=>{ deleteRowCookie(rowKey); row.remove(); });
 
-  // Stoploss/buy validation
   [stoplossInput,stopbuyInput].forEach(inp=>{
     inp.addEventListener('input',()=>{
       let val=inp.value.replace(/[^\d.]/g,'');
@@ -133,34 +134,23 @@ function addTickerRow(ticker='',stoploss='',stopbuy='',warning='',daypct='',ttsA
     });
   });
 
-  // Warning
   warningInput.addEventListener('input', () => {
-	  // Keep only digits, dots, commas
 	  let val = warningInput.value.replace(/[^0-9.,]/g, '');
-
-	  // Split by commas to validate each number
 	  const parts = val.split(',');
 	  const cleanedParts = parts.map(p => {
 	    const dotParts = p.split('.');
-	    // Allow at most 2 dots per number (adjust if needed)
 	    return dotParts.length > 2 ? dotParts[0] + '.' + dotParts.slice(1).join('') : p;
 	  });
-
-	  // Rejoin with commas, consecutive commas preserved
 	  warningInput.value = cleanedParts.join(',');
 	});
 
-
-  // Day %
-  
-	daypctInput.addEventListener('input', () => {
+  daypctInput.addEventListener('input', () => {
 	  let val = daypctInput.value.replace(/[^0-9.\-]/g, '');
 	  const num = parseFloat(val);
-	  // Allow 0 and numbers between -99.99 and 99.99
 	  if (!isNaN(num) && (num < -99.99 || num > 99.99)) val = '';
 	  daypctInput.value = val;
 	});
-  // Save cookie
+
   function saveRowCookie(){
     const obj={ticker:tickerInput.value.trim(),
                stoploss:stoplossInput.value.trim(),
@@ -173,8 +163,22 @@ function addTickerRow(ticker='',stoploss='',stopbuy='',warning='',daypct='',ttsA
   [tickerInput,stoplossInput,stopbuyInput,warningInput,daypctInput,ttsBox].forEach(inp=>{inp.addEventListener('input',saveRowCookie); inp.addEventListener('change',saveRowCookie); });
 }
 
-// Delete cookie
+// --- Delete cookie ---
 function deleteRowCookie(key){ if(key) deleteCookie(key); delete lastClose[key]; delete triggerCount[key]; }
+
+// --- Helpers for last close ---
+function getLastMinuteOfInterval(interval) {
+  switch(interval) {
+    case '1m': return 15*60 + 59;      // 15:59
+    case '5m': return 15*60 + 55;      // 15:55
+    case '10m': return 15*60 + 50;     // 15:50
+    case '15m': return 15*60 + 45;     // 15:45
+    case '20m': return 15*60 + 40;     // 15:40
+    case '30m': return 15*60 + 30;     // 15:30
+    case '1h': return 15*60 + 30;      // 15:30
+    default: return 15*60 + 55;        // fallback 15:55
+  }
+}
 
 // --- Fetch ticker ---
 async function fetchTicker(row){
@@ -197,18 +201,21 @@ async function fetchTicker(row){
     const prevSpan=row.querySelector('.prev-close');
     priceSpan.textContent=c!=null?c.toFixed(2):'—';
 
-    // --- Previous day close based on last 15:55 EDT candle ---
+    // --- Previous close based on interval ---
     function tsToEDT(ts) {
       const d=new Date(ts*1000);
       const edtStr=d.toLocaleString('en-US',{timeZone:'America/New_York'});
       return new Date(edtStr);
     }
-    let prevClose=null;
+
     const today=tsToEDT(ts[idx]).getDate();
+    const lastMinute=getLastMinuteOfInterval(interval);
+    let prevClose=null;
+
     for(let i=idx-1;i>=0;i--){
       const dt=tsToEDT(ts[i]);
-      const hour=dt.getHours(), min=dt.getMinutes();
-      if(dt.getDate()!==today && hour===15 && min>=55){
+      const h=dt.getHours(), m=dt.getMinutes();
+      if(dt.getDate()!==today && (h*60 + m) >= lastMinute){
         prevClose=q.close[i];
         break;
       }
@@ -239,43 +246,44 @@ async function fetchTicker(row){
 
     // Warning
     const wpList=row.querySelector('.warning-input').value.split(',').map(x=>parseFloat(x)).filter(x=>!isNaN(x));
-		function formatWP(wp) {
-		  return Number.isInteger(wp) ? wp.toString() : wp.toFixed(2);
-		}
-		// Usage in your alert:
-		wpList.forEach(wp => {
-		  if (Math.abs(c - wp) <= Math.max(c * 0.005, 0.01)) {
-		    speakAlert(`${sym} near warning ${formatWP(wp)}`);
-		  }
-		});
+    function formatWP(wp) { return Number.isInteger(wp) ? wp.toString() : wp.toFixed(2); }
+    wpList.forEach(wp => {
+      if (Math.abs(c - wp) <= Math.max(c * 0.005, 0.01)) speakAlert(`${sym} near warning ${formatWP(wp)}`);
+    });
+
     // Day % alert
     const daypct=parseFloat(row.querySelector('.daypct-input').value);
-    if(!isNaN(daypct)){ if((daypct<0 && pctChange<=daypct)||(daypct>0 && pctChange>=daypct)) speakAlert(`${sym} daily change ${pctChange.toFixed(2)}%`); }
+    if(!isNaN(daypct)){ 
+      if((daypct<0 && pctChange<=daypct)||(daypct>0 && pctChange>=daypct)) 
+        speakAlert(`${sym} daily change ${pctChange.toFixed(2)}%`); 
+    }
 
   }catch(err){ console.error('fetch failed',sym,err); }
 }
 
+// --- Fetch all ---
+async function fetchAllTickers(){ 
+  document.querySelectorAll('.ticker-row').forEach(row=>fetchTicker(row)); 
+  $('status').textContent='Updated • '+(new Date()).toLocaleTimeString(); 
+}
 
-// --- Fetch all
-async function fetchAllTickers(){ document.querySelectorAll('.ticker-row').forEach(row=>fetchTicker(row)); $('status').textContent='Updated • '+(new Date()).toLocaleTimeString(); }
-
-// --- Fetch with proxy
+// --- Fetch with proxy ---
 async function fetchWithProxy(url){ 
   try{ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(r.status); return await r.json(); }
   catch(e){ const proxy='https://corsproxy.io/?'+encodeURIComponent(url); const r2=await fetch(proxy,{cache:'no-store'}); if(!r2.ok) throw new Error('Proxy '+r2.status); return await r2.json(); }
 }
 
-// --- Auto-refresh
+// --- Auto-refresh ---
 function startRefresh(){ if(refreshTimer) clearInterval(refreshTimer); const ms=parseInt($('refresh').value); if(ms>0) refreshTimer=setInterval(fetchAllTickers,ms); }
 
-// --- Events
+// --- Events ---
 $('go').addEventListener('click',fetchAllTickers);
 $('interval').addEventListener('change',fetchAllTickers);
 $('refresh').addEventListener('change',startRefresh);
 $('addTicker').addEventListener('click',()=>addTickerRow());
 $('clearAll').addEventListener('click',()=>clearAllCookies());
 
-// --- Load cookies
+// --- Load cookies ---
 window.addEventListener('DOMContentLoaded',()=>{
   const cookies=document.cookie.split(';').map(c=>c.trim()); let restored=0;
   cookies.forEach(c=>{
