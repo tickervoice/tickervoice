@@ -3,23 +3,27 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Yahoo/YFinance demo — dynamic tickers + TTS + cookies</title>
+<title>Yahoo/YFinance TTS Demo</title>
 <style>
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:24px;background:#f7fafc;color:#0f172a}
 .card{background:white;padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(15,23,42,0.08);max-width:950px}
 input, button, select {padding:8px 10px;font-size:15px;border-radius:8px;border:1px solid #e6eef6;color:#000;}
 button{background:#2563eb;color:white;border:0;font-weight:600;cursor:pointer;}
 .row{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-.grid{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
-.kv{background:#f1f5f9;padding:12px;border-radius:8px;min-width:120px;text-align:center}
+.ticker-row{flex-direction:column;align-items:flex-start;border:1px solid #e5e7eb;padding:8px;border-radius:10px;margin-bottom:10px;background:#fafafa;width:100%;}
+.ticker-line1{display:flex;align-items:center;gap:6px;width:100%}
+.ticker-line2{display:flex;align-items:center;gap:6px;width:100%;margin-top:4px}
+.ticker-row input{flex:1}
+.remove-btn{flex:0 0 30px}
+.price-box{margin-left:auto;min-width:110px;text-align:right;}
+.warning-input{flex:2}
+.daypct-input{flex:1;max-width:100px}
 .muted{color:#64748b;font-size:14px}
-.ticker-row input{width:100px;}
-.ticker-row button{width:30px;}
 </style>
 </head>
 <body>
 <div class="card">
-<h2>Yahoo/YFinance — TTS demo</h2>
+<h2>Yahoo/YFinance — TTS Demo</h2>
 
 <div class="row">
   <select id="interval">
@@ -27,10 +31,6 @@ button{background:#2563eb;color:white;border:0;font-weight:600;cursor:pointer;}
     <option value="5m" selected>5m</option>
     <option value="1h">1h</option>
     <option value="1d">1d</option>
-  </select>
-  <select id="range">
-    <option value="1d" selected>1d</option>
-    <option value="1mo">1mo</option>
   </select>
   <button id="go">Get</button>
   <select id="refresh">
@@ -48,232 +48,246 @@ button{background:#2563eb;color:white;border:0;font-weight:600;cursor:pointer;}
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
-let refreshTimer = null;
-let lastClose = {};
-let triggerCount = {};
+const $ = id=>document.getElementById(id);
+let refreshTimer=null, lastClose={}, triggerCount={};
 
-// --- Cookie helpers ---
+// --- TTS voices ---
+let maleVoice=null, femaleVoice=null;
+function loadVoices(){
+  const voices=speechSynthesis.getVoices();
+  maleVoice=voices.find(v=>/male|David|Google UK English Male/i.test(v.name))||voices[0];
+  femaleVoice=voices.find(v=>/female|Zira|Google US English/i.test(v.name))||voices[1]||voices[0];
+}
+if(speechSynthesis.onvoiceschanged!==undefined) speechSynthesis.onvoiceschanged=loadVoices;
+loadVoices();
+
+function speakNormal(text){
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US'; u.rate=1.6; u.pitch=1.0; if(maleVoice) u.voice=maleVoice;
+  window.speechSynthesis.speak(u);
+}
+function speakAlert(text){
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US'; u.rate=1.4; u.pitch=1.2; if(femaleVoice) u.voice=femaleVoice;
+  window.speechSynthesis.speak(u);
+}
+
+// --- Cookies ---
 function setCookie(name,value,days=365){
   const d=new Date(); d.setTime(d.getTime()+days*24*60*60*1000);
   document.cookie=`${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/`;
 }
-function deleteCookie(name){
-  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
-}
-function clearAllCookies(){
-  document.cookie.split(';').forEach(c=>{
-    const name = c.split('=')[0].trim();
-    if(name.startsWith('row-')) deleteCookie(name);
-  });
-  triggerCount = {};
-  lastClose = {};
-  $('tickerContainer').innerHTML='';
-}
-
-// --- Generate unique key for rows ---
-function genKey(){ return 'row-' + Math.random().toString(36).substr(2,9); }
-
-// --- Map interval to range ---
-function mapRange(interval){
-  switch(interval){
-    case '5m': return '1d';
-    case '1h': return '1mo';
-    case '1d': return '1mo';
-    case '1m': return '1d';
-    default: return '1d';
-  }
-}
-
-// --- Fetch with proxy ---
-async function fetchWithProxy(url){
-  try{
-    const r = await fetch(url,{cache:"no-store"});
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    return await r.json();
-  }catch(e){
-    const proxy='https://corsproxy.io/?'+encodeURIComponent(url);
-    const r2=await fetch(proxy,{cache:"no-store"});
-    if(!r2.ok) throw new Error('Proxy HTTP '+r2.status);
-    return await r2.json();
-  }
+function deleteCookie(name){ document.cookie=name+'=; expires=Thu,01 Jan 1970 00:00:00 GMT; path=/'; }
+function clearAllCookies(){ 
+  document.cookie.split(';').forEach(c=>{ const name=c.split('=')[0].trim(); if(name.startsWith('row-')) deleteCookie(name); }); 
+  lastClose={}; triggerCount={}; $('tickerContainer').innerHTML='';
 }
 
 // --- Helpers ---
 function safeNumber(x){return (x==null||Number.isNaN(x))?'—':Number(x).toLocaleString(undefined,{maximumFractionDigits:2});}
-function speak(text){
-  if(!window.speechSynthesis) return;
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang='en-US';
-  const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-  utter.rate = isMobile ? 1.2 : 1.6;
-  window.speechSynthesis.speak(utter);
-}
+function genKey(){ return 'row-'+Math.random().toString(36).substr(2,9); }
 
 // --- Add ticker row ---
-function addTickerRow(ticker='', stoploss='', stopbuy='', key=null){
-  const rowKey = key || genKey();
-  const row=document.createElement('div');
-  row.className='row ticker-row';
-  row.dataset.key=rowKey;
+function addTickerRow(ticker='',stoploss='',stopbuy='',warning='',daypct='',ttsActive=false,key=null){
+  const rowKey=key||genKey();
+  const row=document.createElement('div'); row.className='ticker-row'; row.dataset.key=rowKey;
   row.innerHTML=`
-    <input class="ticker-input" placeholder="Ticker" value="${ticker}">
-    <input class="stoploss-input" placeholder="StopLoss" value="${stoploss}" ${stoploss?'':'disabled'}>
-    <input class="stopbuy-input" placeholder="StopBuy" value="${stopbuy}" ${stopbuy?'':'disabled'}>
-    <button class="remove-btn">-</button>
-    <div class="grid card-${rowKey}"></div>
+    <div class="ticker-line1">
+      <input class="ticker-input" placeholder="Ticker" value="${ticker}">
+      <input class="stoploss-input" placeholder="StopLoss" value="${stoploss}" ${stoploss?'':'disabled'}>
+      <input class="stopbuy-input" placeholder="StopBuy" value="${stopbuy}" ${stopbuy?'':'disabled'}>
+      <button class="remove-btn">-</button>
+      <div class="price-box">
+        <span class="price">0</span> 
+        <span class="pct">0%</span> 
+        <span class="prev-close muted">(Prev: 0)</span>
+      </div>
+    </div>
+    <div class="ticker-line2">
+      <input class="warning-input" placeholder="Warning Prices" value="${warning}">
+      <input class="daypct-input" placeholder="Day %" value="${daypct}">%
+      <label><input type="checkbox" class="tts-checkbox" ${ttsActive?'checked':''}> Regular TTS</label>
+    </div>
   `;
   $('tickerContainer').appendChild(row);
 
   const tickerInput=row.querySelector('.ticker-input');
   const stoplossInput=row.querySelector('.stoploss-input');
   const stopbuyInput=row.querySelector('.stopbuy-input');
+  const warningInput=row.querySelector('.warning-input');
+  const daypctInput=row.querySelector('.daypct-input');
+  const ttsBox=row.querySelector('.tts-checkbox');
+  const priceSpan=row.querySelector('.price');
+  const pctSpan=row.querySelector('.pct');
+  const prevSpan=row.querySelector('.prev-close');
 
-  // Input validation (numbers only, allow decimal)
-  [stoplossInput, stopbuyInput].forEach(inp=>{
-    inp.addEventListener('input', ()=>{
-      let val = inp.value.replace(/[^\d.]/g,'');
-      const parts = val.split('.');
-      if(parts.length>2) val = parts[0]+'.'+parts.slice(1).join('');
-      inp.value = val;
-      saveRowCookie(row);
+  // Remove row
+  row.querySelector('.remove-btn').addEventListener('click',()=>{ deleteRowCookie(rowKey); row.remove(); });
+
+  // Stoploss/buy validation
+  [stoplossInput,stopbuyInput].forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      let val=inp.value.replace(/[^\d.]/g,'');
+      const parts=val.split('.'); if(parts.length>2) val=parts[0]+'.'+parts.slice(1).join('');
+      inp.value=val; saveRowCookie(row);
     });
   });
 
-  // Save cookie when ticker changes
-  tickerInput.addEventListener('input', ()=>saveRowCookie(row));
-  tickerInput.addEventListener('focusout', ()=>saveRowCookie(row));
+  // Warning
+  warningInput.addEventListener('input', () => {
+	  // Keep only digits, dots, commas
+	  let val = warningInput.value.replace(/[^0-9.,]/g, '');
 
-  // Remove row + cookie
-  row.querySelector('.remove-btn').addEventListener('click', ()=>{
-    deleteRowCookie(row.dataset.key);
-    row.remove();
-    if(document.querySelectorAll('.ticker-row').length===0){
-      lastClose={}; triggerCount={};
-    }
-  });
-}
+	  // Split by commas to validate each number
+	  const parts = val.split(',');
+	  const cleanedParts = parts.map(p => {
+	    const dotParts = p.split('.');
+	    // Allow at most 2 dots per number (adjust if needed)
+	    return dotParts.length > 2 ? dotParts[0] + '.' + dotParts.slice(1).join('') : p;
+	  });
 
-// --- Save / Delete cookie ---
-function saveRowCookie(row){
-  const ticker=row.querySelector('.ticker-input').value.trim();
-  const stoploss=row.querySelector('.stoploss-input').value.trim();
-  const stopbuy=row.querySelector('.stopbuy-input').value.trim();
-  if(ticker){
-    setCookie(row.dataset.key, JSON.stringify({ticker, stoploss, stopbuy}));
+	  // Rejoin with commas, consecutive commas preserved
+	  warningInput.value = cleanedParts.join(',');
+	});
+
+
+  // Day %
+  
+	daypctInput.addEventListener('input', () => {
+	  let val = daypctInput.value.replace(/[^0-9.\-]/g, '');
+	  const num = parseFloat(val);
+	  // Allow 0 and numbers between -99.99 and 99.99
+	  if (!isNaN(num) && (num < -99.99 || num > 99.99)) val = '';
+	  daypctInput.value = val;
+	});
+  // Save cookie
+  function saveRowCookie(){
+    const obj={ticker:tickerInput.value.trim(),
+               stoploss:stoplossInput.value.trim(),
+               stopbuy:stopbuyInput.value.trim(),
+               warning:warningInput.value.trim(),
+               daypct:daypctInput.value.trim(),
+               ttsActive:ttsBox.checked};
+    if(obj.ticker) setCookie(rowKey,JSON.stringify(obj));
   }
-}
-function deleteRowCookie(key){
-  if(key) deleteCookie(key);
-  delete lastClose[key];
-  delete triggerCount[key];
+  [tickerInput,stoplossInput,stopbuyInput,warningInput,daypctInput,ttsBox].forEach(inp=>{inp.addEventListener('input',saveRowCookie); inp.addEventListener('change',saveRowCookie); });
 }
 
-// --- Fetch ticker data ---
+// Delete cookie
+function deleteRowCookie(key){ if(key) deleteCookie(key); delete lastClose[key]; delete triggerCount[key]; }
+
+// --- Fetch ticker ---
 async function fetchTicker(row){
-  const tickerInput=row.querySelector('.ticker-input');
-  const stoplossInput=row.querySelector('.stoploss-input');
-  const stopbuyInput=row.querySelector('.stopbuy-input');
-  const sym=tickerInput.value.trim();
+  const sym=row.querySelector('.ticker-input').value.trim();
   if(!sym) return;
-
-  const range=mapRange($('interval').value);
-  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=${range}&interval=${$('interval').value}`;
+  const interval=$('interval').value;
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=5d&interval=${interval}`;
 
   try{
-    const json=await fetchWithProxy(url);
-    const res=json.chart.result[0];
+    const data=await fetchWithProxy(url);
+    const res=data.chart.result[0];
     const q=res.indicators.quote[0];
     const ts=res.timestamp;
     let idx=ts.length-1; while(idx>=0 && q.close[idx]==null) idx--;
     if(idx<0) return;
 
-    const o=q.open[idx], h=q.high[idx], l=q.low[idx], c=q.close[idx], v=q.volume[idx];
-    const cardDiv=row.querySelector(`.card-${row.dataset.key}`);
-    cardDiv.innerHTML=`
-      <div class="kv"><strong>${sym} Open</strong><div>${safeNumber(o)}</div></div>
-      <div class="kv"><strong>${sym} High</strong><div>${safeNumber(h)}</div></div>
-      <div class="kv"><strong>${sym} Low</strong><div>${safeNumber(l)}</div></div>
-      <div class="kv"><strong>${sym} Close</strong><div>${safeNumber(c)}</div></div>
-      <div class="kv"><strong>${sym} Volume</strong><div>${v?.toLocaleString()||'—'}</div></div>
-    `;
+    const c=q.close[idx];
+    const priceSpan=row.querySelector('.price');
+    const pctSpan=row.querySelector('.pct');
+    const prevSpan=row.querySelector('.prev-close');
+    priceSpan.textContent=c!=null?c.toFixed(2):'—';
 
-    if(c!=null){
-      stoplossInput.disabled=false;
-      stopbuyInput.disabled=false;
-
-      if(lastClose[row.dataset.key]!==c){
-        speak(`${sym.toUpperCase()} $${c.toFixed(2)}`);
-        lastClose[row.dataset.key]=c;
-      }
-      if(!triggerCount[row.dataset.key]) triggerCount[row.dataset.key]={stoploss:0, stopbuy:0};
-
-      const sl=parseFloat(stoplossInput.value);
-      const sb=parseFloat(stopbuyInput.value);
-
-      if(!isNaN(sl) && c<=sl){
-        triggerCount[row.dataset.key].stoploss++;
-        speak(`${sym.toUpperCase()} stopped out at $${c.toFixed(2)}`);
-        if(triggerCount[row.dataset.key].stoploss>=3){
-          stoplossInput.value=''; triggerCount[row.dataset.key].stoploss=0; saveRowCookie(row);
-        }
-      } else if(!isNaN(sl)) triggerCount[row.dataset.key].stoploss=0;
-
-      if(!isNaN(sb) && c>=sb){
-        triggerCount[row.dataset.key].stopbuy++;
-        speak(`${sym.toUpperCase()} triggered buy at $${c.toFixed(2)}`);
-        if(triggerCount[row.dataset.key].stopbuy>=3){
-          stopbuyInput.value=''; triggerCount[row.dataset.key].stopbuy=0; saveRowCookie(row);
-        }
-      } else if(!isNaN(sb)) triggerCount[row.dataset.key].stopbuy=0;
-
-    } else {
-      stoplossInput.disabled=true;
-      stopbuyInput.disabled=true;
+    // --- Previous day close based on last 15:55 EDT candle ---
+    function tsToEDT(ts) {
+      const d=new Date(ts*1000);
+      const edtStr=d.toLocaleString('en-US',{timeZone:'America/New_York'});
+      return new Date(edtStr);
     }
+    let prevClose=null;
+    const today=tsToEDT(ts[idx]).getDate();
+    for(let i=idx-1;i>=0;i--){
+      const dt=tsToEDT(ts[i]);
+      const hour=dt.getHours(), min=dt.getMinutes();
+      if(dt.getDate()!==today && hour===15 && min>=55){
+        prevClose=q.close[i];
+        break;
+      }
+    }
+    if(prevClose==null) prevClose=c; // fallback
+    prevSpan.textContent=`(Prev: ${prevClose!=null?prevClose.toFixed(2):'—'})`; // debug
 
-  }catch(err){ console.error('Error fetching '+sym,err); }
+    // % change
+    const pctChange=(prevClose>0 && c!=null)?((c-prevClose)/prevClose*100):0;
+    pctSpan.textContent=pctChange.toFixed(2)+'%';
+
+    // Stop fields
+    const stoplossInput=row.querySelector('.stoploss-input');
+    const stopbuyInput=row.querySelector('.stopbuy-input');
+    if(c!=null){ stoplossInput.disabled=false; stopbuyInput.disabled=false; } 
+    else { stoplossInput.disabled=true; stopbuyInput.disabled=true; }
+
+    const key=row.dataset.key;
+    const ttsActive=row.querySelector('.tts-checkbox').checked;
+    if(lastClose[key]!==c && c!=null){ if(ttsActive) speakNormal(`${sym} $${c.toFixed(2)}`); lastClose[key]=c; }
+    if(!triggerCount[key]) triggerCount[key]={stoploss:0, stopbuy:0};
+
+    // Stoploss/stopbuy triggers
+    const sl=parseFloat(stoplossInput.value);
+    const sb=parseFloat(stopbuyInput.value);
+    if(!isNaN(sl)&&c<=sl){ triggerCount[key].stoploss++; speakAlert(`${sym} stopped out at $${c.toFixed(2)}`); if(triggerCount[key].stoploss>=3){stoplossInput.value=''; triggerCount[key].stoploss=0; saveRowCookie(row);} } else triggerCount[key].stoploss=0;
+    if(!isNaN(sb)&&c>=sb){ triggerCount[key].stopbuy++; speakAlert(`${sym} triggered buy at $${c.toFixed(2)}`); if(triggerCount[key].stopbuy>=3){stopbuyInput.value=''; triggerCount[key].stopbuy=0; saveRowCookie(row);} } else triggerCount[key].stopbuy=0;
+
+    // Warning
+    const wpList=row.querySelector('.warning-input').value.split(',').map(x=>parseFloat(x)).filter(x=>!isNaN(x));
+		function formatWP(wp) {
+		  return Number.isInteger(wp) ? wp.toString() : wp.toFixed(2);
+		}
+		// Usage in your alert:
+		wpList.forEach(wp => {
+		  if (Math.abs(c - wp) <= Math.max(c * 0.005, 0.01)) {
+		    speakAlert(`${sym} near warning ${formatWP(wp)}`);
+		  }
+		});
+    // Day % alert
+    const daypct=parseFloat(row.querySelector('.daypct-input').value);
+    if(!isNaN(daypct)){ if((daypct<0 && pctChange<=daypct)||(daypct>0 && pctChange>=daypct)) speakAlert(`${sym} daily change ${pctChange.toFixed(2)}%`); }
+
+  }catch(err){ console.error('fetch failed',sym,err); }
 }
 
-// --- Fetch all ---
-function fetchAllTickers(){
-  document.querySelectorAll('.ticker-row').forEach(row=>fetchTicker(row));
-  $('status').textContent='Updated • '+(new Date()).toLocaleTimeString();
+
+// --- Fetch all
+async function fetchAllTickers(){ document.querySelectorAll('.ticker-row').forEach(row=>fetchTicker(row)); $('status').textContent='Updated • '+(new Date()).toLocaleTimeString(); }
+
+// --- Fetch with proxy
+async function fetchWithProxy(url){ 
+  try{ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(r.status); return await r.json(); }
+  catch(e){ const proxy='https://corsproxy.io/?'+encodeURIComponent(url); const r2=await fetch(proxy,{cache:'no-store'}); if(!r2.ok) throw new Error('Proxy '+r2.status); return await r2.json(); }
 }
 
-// --- Auto-refresh ---
-function startRefresh(){
-  if(refreshTimer) clearInterval(refreshTimer);
-  const ms=parseInt($('refresh').value);
-  if(ms>0) refreshTimer=setInterval(fetchAllTickers, ms);
-}
+// --- Auto-refresh
+function startRefresh(){ if(refreshTimer) clearInterval(refreshTimer); const ms=parseInt($('refresh').value); if(ms>0) refreshTimer=setInterval(fetchAllTickers,ms); }
 
-// --- Events ---
-$('go').addEventListener('click', fetchAllTickers);
-$('interval').addEventListener('change', fetchAllTickers);
-$('refresh').addEventListener('change', startRefresh);
-$('addTicker').addEventListener('click', ()=>addTickerRow());
-$('clearAll').addEventListener('click', ()=>clearAllCookies());
+// --- Events
+$('go').addEventListener('click',fetchAllTickers);
+$('interval').addEventListener('change',fetchAllTickers);
+$('refresh').addEventListener('change',startRefresh);
+$('addTicker').addEventListener('click',()=>addTickerRow());
+$('clearAll').addEventListener('click',()=>clearAllCookies());
 
-// --- Load cookies ---
-window.addEventListener('DOMContentLoaded', ()=>{
-  const cookies=document.cookie.split(';').map(c=>c.trim());
-  let restored=0;
+// --- Load cookies
+window.addEventListener('DOMContentLoaded',()=>{
+  const cookies=document.cookie.split(';').map(c=>c.trim()); let restored=0;
   cookies.forEach(c=>{
     const eq=c.indexOf('='); if(eq<0) return;
     const name=c.substring(0,eq).trim();
     const value=c.substring(eq+1).trim();
-    if(name.startsWith('row-') && value){
-      try{
-        const data=JSON.parse(decodeURIComponent(value));
-        addTickerRow(data.ticker,data.stoploss,data.stopbuy,name);
-        restored++;
-      }catch(e){}
+    if(name.startsWith('row-')&&value){
+      try{ const d=JSON.parse(decodeURIComponent(value)); addTickerRow(d.ticker,d.stoploss,d.stopbuy,d.warning,d.daypct,d.ttsActive,name); restored++; }catch(e){}
     }
   });
-  if(restored===0) addTickerRow();   // only add default row if no cookies exist
-  fetchAllTickers();
-  startRefresh();
+  if(restored===0) addTickerRow();
+  fetchAllTickers(); startRefresh();
 });
 </script>
 </body>

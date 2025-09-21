@@ -148,11 +148,22 @@ function addTickerRow(ticker='',url='',stoploss='',stopbuy='',warning='',daypct=
   });
 
   // Input validation
-  warningInput.addEventListener('input',()=>{
-    let val=warningInput.value.replace(/[^0-9.,]/g,'');
-    val=val.replace(/,+/g,',').replace(/^,|,$/g,'');
-    warningInput.value=val;
-  });
+  warningInput.addEventListener('input', () => {
+	  // Keep only digits, dots, commas
+	  let val = warningInput.value.replace(/[^0-9.,]/g, '');
+
+	  // Split by commas to validate each number
+	  const parts = val.split(',');
+	  const cleanedParts = parts.map(p => {
+	    const dotParts = p.split('.');
+	    // Allow at most 2 dots per number (adjust if needed)
+	    return dotParts.length > 2 ? dotParts[0] + '.' + dotParts.slice(1).join('') : p;
+	  });
+
+	  // Rejoin with commas, consecutive commas preserved
+	  warningInput.value = cleanedParts.join(',');
+	});
+  
   daypctInput.addEventListener('input',()=>{
     let val=daypctInput.value.replace(/[^0-9.\-]/g,'');
     daypctInput.value=val;
@@ -242,11 +253,16 @@ async function fetchTicker(row){
 
     // Warning prices
     const wpList=row.querySelector('.warning-input').value.split(',').map(x=>parseFloat(x)).filter(x=>!isNaN(x));
-    wpList.forEach(wp=>{
-      if(Math.abs(price-wp)<=Math.max(price*0.005,0.01)){
-        speakAlert(`${ticker} near warning ${wp.toFixed(2)}`);
-      }
-    });
+		function formatWP(wp) {
+		  return Number.isInteger(wp) ? wp.toString() : wp.toFixed(2);
+		}
+
+		// Usage in your alert:
+		wpList.forEach(wp => {
+		  if (Math.abs(c - wp) <= Math.max(c * 0.005, 0.01)) {
+		    speakAlert(`${sym} near warning ${formatWP(wp)}`);
+		  }
+		});
 
     // Day % alert
     const daypct=parseFloat(row.querySelector('.daypct-input').value);
@@ -296,4 +312,3 @@ window.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
-
