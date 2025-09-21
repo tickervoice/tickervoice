@@ -166,17 +166,17 @@ function addTickerRow(ticker='',stoploss='',stopbuy='',warning='',daypct='',ttsA
 // --- Delete cookie ---
 function deleteRowCookie(key){ if(key) deleteCookie(key); delete lastClose[key]; delete triggerCount[key]; }
 
-// --- Helpers for last close ---
+// --- Last close minute mapping ---
 function getLastMinuteOfInterval(interval) {
   switch(interval) {
-    case '1m': return 15*60 + 59;      // 15:59
-    case '5m': return 15*60 + 55;      // 15:55
-    case '10m': return 15*60 + 50;     // 15:50
-    case '15m': return 15*60 + 45;     // 15:45
-    case '20m': return 15*60 + 40;     // 15:40
-    case '30m': return 15*60 + 30;     // 15:30
-    case '1h': return 15*60 + 30;      // 15:30
-    default: return 15*60 + 55;        // fallback 15:55
+    case '1m': return 15*60 + 59;
+    case '5m': return 15*60 + 55;
+    case '10m': return 15*60 + 50;
+    case '15m': return 15*60 + 45;
+    case '20m': return 15*60 + 40;
+    case '30m': return 15*60 + 30;
+    case '1h': return 15*60 + 30;
+    default: return 15*60 + 55;
   }
 }
 
@@ -201,7 +201,6 @@ async function fetchTicker(row){
     const prevSpan=row.querySelector('.prev-close');
     priceSpan.textContent=c!=null?c.toFixed(2):'—';
 
-    // --- Previous close based on interval ---
     function tsToEDT(ts) {
       const d=new Date(ts*1000);
       const edtStr=d.toLocaleString('en-US',{timeZone:'America/New_York'});
@@ -220,14 +219,12 @@ async function fetchTicker(row){
         break;
       }
     }
-    if(prevClose==null) prevClose=c; // fallback
-    prevSpan.textContent=`(Prev: ${prevClose!=null?prevClose.toFixed(2):'—'})`; // debug
+    if(prevClose==null) prevClose=c;
+    prevSpan.textContent=`(Prev: ${prevClose!=null?prevClose.toFixed(2):'—'})`;
 
-    // % change
     const pctChange=(prevClose>0 && c!=null)?((c-prevClose)/prevClose*100):0;
     pctSpan.textContent=pctChange.toFixed(2)+'%';
 
-    // Stop fields
     const stoplossInput=row.querySelector('.stoploss-input');
     const stopbuyInput=row.querySelector('.stopbuy-input');
     if(c!=null){ stoplossInput.disabled=false; stopbuyInput.disabled=false; } 
@@ -238,24 +235,18 @@ async function fetchTicker(row){
     if(lastClose[key]!==c && c!=null){ if(ttsActive) speakNormal(`${sym} $${c.toFixed(2)}`); lastClose[key]=c; }
     if(!triggerCount[key]) triggerCount[key]={stoploss:0, stopbuy:0};
 
-    // Stoploss/stopbuy triggers
     const sl=parseFloat(stoplossInput.value);
     const sb=parseFloat(stopbuyInput.value);
     if(!isNaN(sl)&&c<=sl){ triggerCount[key].stoploss++; speakAlert(`${sym} stopped out at $${c.toFixed(2)}`); if(triggerCount[key].stoploss>=3){stoplossInput.value=''; triggerCount[key].stoploss=0; saveRowCookie(row);} } else triggerCount[key].stoploss=0;
     if(!isNaN(sb)&&c>=sb){ triggerCount[key].stopbuy++; speakAlert(`${sym} triggered buy at $${c.toFixed(2)}`); if(triggerCount[key].stopbuy>=3){stopbuyInput.value=''; triggerCount[key].stopbuy=0; saveRowCookie(row);} } else triggerCount[key].stopbuy=0;
 
-    // Warning
     const wpList=row.querySelector('.warning-input').value.split(',').map(x=>parseFloat(x)).filter(x=>!isNaN(x));
-    function formatWP(wp) { return Number.isInteger(wp) ? wp.toString() : wp.toFixed(2); }
-    wpList.forEach(wp => {
-      if (Math.abs(c - wp) <= Math.max(c * 0.005, 0.01)) speakAlert(`${sym} near warning ${formatWP(wp)}`);
-    });
+    function formatWP(wp){ return Number.isInteger(wp)?wp.toString():wp.toFixed(2); }
+    wpList.forEach(wp=>{ if(Math.abs(c-wp)<=Math.max(c*0.005,0.01)) speakAlert(`${sym} near warning ${formatWP(wp)}`); });
 
-    // Day % alert
     const daypct=parseFloat(row.querySelector('.daypct-input').value);
-    if(!isNaN(daypct)){ 
-      if((daypct<0 && pctChange<=daypct)||(daypct>0 && pctChange>=daypct)) 
-        speakAlert(`${sym} daily change ${pctChange.toFixed(2)}%`); 
+    if(!isNaN(daypct)){
+      if((daypct<0 && pctChange<=daypct)||(daypct>0 && pctChange>=daypct)) speakAlert(`${sym} daily change ${pctChange.toFixed(2)}%`);
     }
 
   }catch(err){ console.error('fetch failed',sym,err); }
